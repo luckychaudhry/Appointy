@@ -11,7 +11,7 @@ const VideoCall = ({ appointmentId, userName, role = 'patient', onClose, socket 
   const destroyedRef  = useRef(false)
 
   const [loading,    setLoading]    = useState(true)
-  const [timeLeft,   setTimeLeft]   = useState(20 * 60)
+  const [timeLeft,   setTimeLeft]   = useState(21 * 60)
   const [error,      setError]      = useState(null)
   const [callEnded,  setCallEnded]  = useState(false)
 
@@ -230,13 +230,26 @@ const VideoCall = ({ appointmentId, userName, role = 'patient', onClose, socket 
             )}
 
             <button onClick={hangUp} style={{
-              background: 'linear-gradient(135deg,#EF4444,#DC2626)',
-              color: '#fff', border: 'none', borderRadius: 20,
-              padding: '8px 18px', fontSize: 13, fontWeight: 700, cursor: 'pointer',
-              display: 'flex', alignItems: 'center', gap: 6,
-              boxShadow: '0 4px 14px rgba(239,68,68,0.4)',
-              transition: 'transform 0.15s',
-            }}
+  background: 'linear-gradient(135deg,#EF4444,#DC2626)',
+  color: '#fff',
+  border: 'none',
+  borderRadius: 20,
+  padding: '8px 18px',
+  fontSize: 13,
+  fontWeight: 700,
+  cursor: 'pointer',
+  display: 'flex',
+  alignItems: 'center',
+  gap: 6,
+  boxShadow: '0 4px 14px rgba(239,68,68,0.4)',
+  transition: 'transform 0.15s',
+
+  position: 'fixed',
+  bottom: '20px',
+  left: '50%',
+  transform: 'translateX(-50%)',
+  zIndex: 999999,
+}}
               onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.04)'}
               onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
             >

@@ -1,9 +1,9 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react'
-
+import axios from 'axios'
 const APP_ID     = 1164488927
 const SERVER_SEC = '72e3e9d53577a5af1c0c01949ea2d659'
 
-const VideoCall = ({ appointmentId, userName, role = 'patient', onClose, socket }) => {
+const VideoCall = ({ appointmentId, userName, role = 'patient', onClose, socket, onCallEnd, backendUrl, dToken }) => {
   const containerRef  = useRef(null)
   const zegoRef       = useRef(null)
   const timerRef      = useRef(null)
@@ -45,9 +45,19 @@ const VideoCall = ({ appointmentId, userName, role = 'patient', onClose, socket 
     if (role === 'doctor' && socket) {
       try { socket.emit('doctor:endCall', { appointmentId }) } catch (e) {}
     }
-    setCallEnded(true)
-  }, [safeDestroy, role, socket, appointmentId])
-
+     if (role === 'doctor') {
+    axios.post(
+      `${backendUrl}/api/doctor/mark-call-completed`,
+      { appointmentId },
+      { headers: { dToken } }
+    ).catch(() => {})
+  }
+  // ── END ──
+  if (role === 'doctor' && onCallEnd) {
+    onCallEnd(appointmentId)
+  }
+  setCallEnded(true)
+}, [safeDestroy, role, socket, appointmentId, onCallEnd])
   useEffect(() => { hangUpRef.current = hangUp }, [hangUp])
 
   const initZego = useCallback(() => {
@@ -230,13 +240,26 @@ const VideoCall = ({ appointmentId, userName, role = 'patient', onClose, socket 
             )}
 
             <button onClick={hangUp} style={{
-              background: 'linear-gradient(135deg,#EF4444,#DC2626)',
-              color: '#fff', border: 'none', borderRadius: 20,
-              padding: '8px 18px', fontSize: 13, fontWeight: 700, cursor: 'pointer',
-              display: 'flex', alignItems: 'center', gap: 6,
-              boxShadow: '0 4px 14px rgba(239,68,68,0.4)',
-              transition: 'transform 0.15s',
-            }}
+  background: 'linear-gradient(135deg,#EF4444,#DC2626)',
+  color: '#fff',
+  border: 'none',
+  borderRadius: 20,
+  padding: '8px 18px',
+  fontSize: 13,
+  fontWeight: 700,
+  cursor: 'pointer',
+  display: 'flex',
+  alignItems: 'center',
+  gap: 6,
+  boxShadow: '0 4px 14px rgba(239,68,68,0.4)',
+  transition: 'transform 0.15s',
+
+  position: 'fixed',
+  bottom: '20px',
+  left: '50%',
+  transform: 'translateX(-50%)',
+  zIndex: 999999,
+}}
               onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.04)'}
               onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
             >

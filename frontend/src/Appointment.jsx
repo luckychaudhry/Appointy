@@ -27,6 +27,8 @@ const Appointment = () => {
   const [cancelledSlots, setCancelledSlots] = useState(new Set())
   const [hasActiveAppt,  setHasActiveAppt]  = useState(false)
   const [activeApptInfo, setActiveApptInfo] = useState('')
+        const [consultationType, setConsultationType] = useState('in-person')
+
 
   // ── Fetch user's appointments to know completed + doctor-cancelled slots ──
   const fetchSlotStatuses = async () => {
@@ -146,9 +148,10 @@ const Appointment = () => {
     try {
       const { data } = await axios.post(
         backendUrl + '/api/user/book-appointment',
-        { docId, slotDate: slot.slotDate, slotTime },
+        { docId, slotDate: slot.slotDate, slotTime,consultationType },
         { headers: { token } }
       )
+      
       if (data.success) {
         toast.success('Appointment booked!')
         getDoctorsData()
@@ -229,6 +232,45 @@ const Appointment = () => {
           </p>
         </div>
       </div>
+
+// Slot picker se pehle ye add karo:
+<div className='sm:ml-72 sm:pl-4 mt-6'>
+  <p className='text-sm font-semibold text-gray-700 mb-3'>Consultation Type</p>
+  <div className='flex gap-3'>
+    <button
+      onClick={() => setConsultationType('in-person')}
+      className={`flex-1 py-3 px-4 rounded-xl border-2 text-sm font-medium transition-all
+        ${consultationType === 'in-person'
+          ? 'border-primary bg-primary/5 text-primary'
+          : 'border-gray-200 text-gray-500 hover:border-gray-300'
+        }`}
+    >
+      🏥 In-Person Visit
+      <p className='text-xs font-normal mt-0.5 opacity-70'>Visit clinic physically</p>
+    </button>
+    <button
+      onClick={() => setConsultationType('video')}
+      className={`flex-1 py-3 px-4 rounded-xl border-2 text-sm font-medium transition-all
+        ${consultationType === 'video'
+          ? 'border-violet-500 bg-violet-50 text-violet-600'
+          : 'border-gray-200 text-gray-500 hover:border-gray-300'
+        }`}
+    >
+      📹 Video Consultation
+      <p className='text-xs font-normal mt-0.5 opacity-70'>Online from home</p>
+    </button>
+    
+  </div>
+  
+{consultationType === 'video' && (
+  <div className='flex items-center gap-2 mt-2 bg-amber-50 border border-amber-200 rounded-xl px-3 py-2'>
+    <span className='text-amber-500 text-sm'>⚠️</span>
+    <p className='text-xs text-amber-600 font-medium'>
+      For video consultation, online payment is required. Please select the video consultation option and proceed to book your appointment.
+    </p>
+  </div>
+)}
+</div>
 
       {/* ── Slot picker ── */}
       <div className='sm:ml-72 sm:pl-4 mt-8 font-medium text-[#565656]'>
