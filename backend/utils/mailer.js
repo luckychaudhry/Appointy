@@ -4,6 +4,7 @@ import nodemailer from 'nodemailer'
 // Works with Gmail, Outlook, or any SMTP provider
 const transporter = nodemailer.createTransport({
   service: process.env.EMAIL_SERVICE || 'gmail',
+  port: 587,
   auth: {
     user: process.env.EMAIL_USER,     // your email e.g. appointy.noreply@gmail.com
     pass: process.env.EMAIL_PASS      // Gmail App Password (not your login password)
