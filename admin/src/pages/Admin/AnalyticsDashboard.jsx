@@ -3,7 +3,7 @@
 
 import React, { useContext, useState } from 'react'
 import { AdminContext } from '../../context/AdminContext'
-import useAnalytics from '../../hooks/UseAnalytics'
+import useAnalytics from '../../hooks/useAnalytics'
 import {
   AreaChart, Area, BarChart, Bar, LineChart, Line,
   PieChart, Pie, Cell, RadialBarChart, RadialBar,
