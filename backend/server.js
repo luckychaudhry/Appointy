@@ -45,7 +45,15 @@ const PORT = process.env.PORT || 4000
 connectCloudinary();
 // Middlewares
 app.use(express.json())
-app.use(cors())
+app.use(cors({
+  origin: [
+    'https://appointyhealthcare.vercel.app',
+    'https://appointyhealthcare-admin.vercel.app',
+    'http://localhost:5173',
+    'http://localhost:5174'
+  ],
+  credentials: true
+}))
 
 // Routes
 app.use('/api/admin',  adminRouter)
