@@ -1,7 +1,7 @@
 import axios from "axios";
 import { createContext, useState } from "react";
 import { toast } from "react-toastify";
-
+import { createContext, useState, useEffect } from "react";
 
 export const AdminContext = createContext()
 
@@ -13,7 +13,22 @@ const AdminContextProvider = (props) => {
 
     const [doctors, setDoctors] = useState([])
     const [dashData, setDashData] = useState(false)
+useEffect(() => {
+  if (!aToken) return
+  const timer = setTimeout(() => {
+    setAToken('')
+    localStorage.removeItem('aToken')
+    toast.info('Session expired — please login again')
+  }, 2 * 60 * 60 * 1000)
+  return () => clearTimeout(timer)
+}, [aToken])
 
+// ── Tab/browser band hone pe logout ──
+useEffect(() => {
+  const handleUnload = () => localStorage.removeItem('aToken')
+  window.addEventListener('beforeunload', handleUnload)
+  return () => window.removeEventListener('beforeunload', handleUnload)
+}, [])
 
     const getAllDoctors = async () => {
 
