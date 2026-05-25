@@ -283,7 +283,7 @@ const MyAppointments = () => {
 
         {filtered.map((item, index) => (
           <div key={index} className={`rounded-2xl border overflow-hidden bg-white transition-all
-            ${item.isCompleted?'border-green-200':'item.cancelled'?'border-red-100 opacity-75':'border-gray-200 hover:shadow-md'}`}>
+            ${item.isCompleted?'border-green-200':item.cancelled?'border-red-100 opacity-75':'border-gray-200 hover:shadow-md'}`}>
 
             {/* color top bar */}
             {item.isCompleted && <div className='h-1 bg-gradient-to-r from-green-400 to-emerald-500'/>}
@@ -444,21 +444,26 @@ const MyAppointments = () => {
 
                 {/* Cancel */}
                {/* Cancel */}
-{!item.cancelled && !item.isCompleted && (
-  <>
-    {isCancelable(item.slotDate, item.slotTime) ? (
-      <button
-        onClick={() => cancelAppointment(item._id)}
-        className='flex-1 min-w-[120px] py-2 px-3 rounded-xl text-xs font-medium border border-gray-200 text-gray-400 hover:border-red-300 hover:text-red-400 transition-all'
-      >
-        Cancel
-      </button>
-    ) : minutesUntil(item.slotDate, item.slotTime) > 0 ? (
-      <div className='flex-1 min-w-[120px] py-2 px-3 rounded-xl text-xs font-medium border border-gray-100 text-gray-300 text-center'>
-        🔒 Cannot cancel
-      </div>
-    ) : null}
-  </>
+{/* Cancel */}
+{!item.cancelled &&
+ !item.isCompleted &&
+ isCancelable(item.slotDate, item.slotTime) && (
+  <button
+    onClick={() => cancelAppointment(item._id)}
+    className='flex-1 min-w-[120px] py-2 px-3 rounded-xl text-xs font-medium border border-gray-200 text-gray-400 hover:border-red-300 hover:text-red-400 transition-all'
+  >
+    Cancel
+  </button>
+)}
+
+{/* Cannot Cancel */}
+{!item.cancelled &&
+ !item.isCompleted &&
+ !isCancelable(item.slotDate, item.slotTime) &&
+ minutesUntil(item.slotDate, item.slotTime) > 0 && (
+  <div className='flex-1 min-w-[120px] py-2 px-3 rounded-xl text-xs font-medium border border-gray-100 text-gray-300 text-center'>
+    🔒 Cannot cancel
+  </div>
 )}
 
               </div>
