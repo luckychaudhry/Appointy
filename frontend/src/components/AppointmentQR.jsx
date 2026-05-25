@@ -210,11 +210,4 @@ const AppointmentQR = ({ appointment, userData }) => {
 }
 
 export default AppointmentQR
-ENDOFFILE
-echo "Done"
-Output
 
-Done
-Done
-
-You are out of free messages until 4:30 PM
