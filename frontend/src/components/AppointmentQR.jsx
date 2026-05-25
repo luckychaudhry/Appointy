@@ -7,6 +7,15 @@ const AppointmentQR = ({ appointment, userData }) => {
   const { } = useContext(AppContext)
   const [showModal, setShowModal] = useState(false)
 
+  React.useEffect(() => {
+    if (showModal) {
+      document.body.style.overflow = 'hidden'
+    } else {
+      document.body.style.overflow = ''
+    }
+    return () => { document.body.style.overflow = '' }
+  }, [showModal])
+
   if (!appointment) return null
 
   const shortId = appointment._id?.slice(-8).toUpperCase() || 'N/A'
@@ -29,7 +38,6 @@ const AppointmentQR = ({ appointment, userData }) => {
   const statusLabel = appointment.cancelled ? 'Cancelled'
     : appointment.isCompleted ? 'Completed' : 'Confirmed'
 
-  // ── Short QR data — sirf essential fields, no JWT ──────────────────────────
   const qrData = JSON.stringify({
     id: shortId,
     p:  (userData?.name || '').slice(0, 12),
@@ -38,37 +46,48 @@ const AppointmentQR = ({ appointment, userData }) => {
     t:  appointment.slotTime,
   })
 
-  const whatsappMsg = `🏥 *Appointy Appointment*\n\n👤 Patient: ${userData?.name}\n👨‍⚕️ Doctor: ${appointment.docData?.name}\n📅 Date: ${slotDateFormatted}\n⏰ Time: ${appointment.slotTime}\n💳 Payment: ${paymentStatus}\n🔖 ID: ${shortId}`
+  const whatsappMsg =
+    `🏥 *Appointy Appointment*\n\n` +
+    `👤 Patient: ${userData?.name || 'N/A'}\n` +
+    `👨‍⚕️ Doctor: ${appointment.docData?.name || 'N/A'}\n` +
+    `📅 Date: ${slotDateFormatted}\n` +
+    `⏰ Time: ${appointment.slotTime || 'N/A'}\n` +
+    `💳 Payment: ${paymentStatus}\n` +
+    `🔖 ID: ${shortId}`
 
   const downloadQR = () => {
     const svg = document.querySelector('#qr-svg-wrapper svg')
     if (!svg) return
+    const size = 340
     const canvas = document.createElement('canvas')
-    canvas.width  = 320
-    canvas.height = 320
+    canvas.width  = size
+    canvas.height = size
     const ctx = canvas.getContext('2d')
+    // solid white background — no transparency
     ctx.fillStyle = '#ffffff'
-    ctx.fillRect(0, 0, 320, 320)
+    ctx.fillRect(0, 0, size, size)
+    const svgClone = svg.cloneNode(true)
+    svgClone.setAttribute('width',  String(size - 20))
+    svgClone.setAttribute('height', String(size - 20))
+    const svgData = new XMLSerializer().serializeToString(svgClone)
     const img = new Image()
     img.onload = () => {
-      ctx.drawImage(img, 10, 10, 300, 300)
+      ctx.drawImage(img, 10, 10, size - 20, size - 20)
       const a = document.createElement('a')
       a.download = `Appointy-QR-${shortId}.png`
       a.href = canvas.toDataURL('image/png')
       a.click()
     }
-    img.src = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(
-      new XMLSerializer().serializeToString(svg)
-    )))
+    img.src = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgData)))
   }
 
   return (
     <>
-      {/* ── Trigger button ── */}
+      {/* Trigger button */}
       <button
         onClick={() => setShowModal(true)}
         className='flex items-center gap-1.5 text-xs text-[#5f6fff] border border-[#5f6fff]
-          rounded-lg px-3 py-1.5 hover:bg-[#5f6fff] hover:text-white transition-all duration-200'
+          rounded-lg px-3 py-1.5 hover:bg-[#5f6fff] hover:text-white transition-all duration-200 w-full justify-center'
       >
         <svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2'>
           <rect x='3' y='3' width='7' height='7' rx='1'/>
@@ -80,24 +99,39 @@ const AppointmentQR = ({ appointment, userData }) => {
         QR Code
       </button>
 
-      {/* ── Modal ── */}
+      {/* Modal */}
       {showModal && (
         <div
-          className='fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4'
+          style={{
+            background: 'rgba(0,0,0,0.65)',
+            backdropFilter: 'blur(4px)',
+            position: 'fixed',
+            inset: 0,
+            zIndex: 50,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: 16,
+            overflowY: 'auto',
+          }}
           onClick={e => { if (e.target === e.currentTarget) setShowModal(false) }}
         >
-          {/* Card */}
-          <div className='bg-white rounded-2xl shadow-2xl w-full max-w-xs overflow-hidden flex flex-col'>
+          <div className='w-full max-w-xs overflow-hidden flex flex-col'
+            style={{
+              background: '#ffffff',
+              borderRadius: 20,
+              boxShadow: '0 32px 80px rgba(0,0,0,0.3)',
+            }}>
 
             {/* Header */}
-            <div className='px-5 pt-5 pb-3 flex items-start justify-between'>
+            <div style={{ padding: '20px 20px 12px', display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
               <div>
-                <h2 className='text-base font-semibold text-gray-800'>Appointment QR</h2>
-                <p className='text-xs text-gray-400 mt-0.5'>Show this at the clinic counter</p>
+                <p style={{ fontSize: 15, fontWeight: 600, color: '#1f2937', margin: 0 }}>Appointment QR</p>
+                <p style={{ fontSize: 11, color: '#9ca3af', marginTop: 2 }}>Show this at the clinic counter</p>
               </div>
               <button
                 onClick={() => setShowModal(false)}
-                className='text-gray-400 hover:text-gray-600 p-1 rounded-full hover:bg-gray-100'
+                style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4, color: '#9ca3af' }}
               >
                 <svg width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2.5'>
                   <path d='M18 6 6 18M6 6l12 12'/>
@@ -105,35 +139,49 @@ const AppointmentQR = ({ appointment, userData }) => {
               </button>
             </div>
 
-            {/* Appointment ID badge */}
-            <div className='mx-5 mb-3 bg-[#5f6fff0d] border border-[#5f6fff25] rounded-xl px-4 py-2.5 flex items-center justify-between'>
+            {/* ID Badge */}
+            <div style={{
+              margin: '0 20px 12px',
+              background: '#f0f1ff',
+              border: '1px solid #d0d3ff',
+              borderRadius: 12,
+              padding: '10px 14px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+            }}>
               <div>
-                <p className='text-[9px] text-[#5f6fff] font-semibold uppercase tracking-widest mb-0.5'>
+                <p style={{ fontSize: 9, color: '#5f6fff', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', margin: 0 }}>
                   Appointment ID
                 </p>
-                <p className='text-xl font-mono font-bold text-[#5f6fff] tracking-widest'>{shortId}</p>
+                <p style={{ fontSize: 20, fontFamily: 'monospace', fontWeight: 700, color: '#5f6fff', letterSpacing: '0.15em', margin: 0 }}>
+                  {shortId}
+                </p>
               </div>
-              <div className='flex flex-col items-end gap-1'>
-                <div className='flex items-center gap-1 text-xs font-medium px-2.5 py-0.5 rounded-full'
-                  style={{ background: `${statusColor}18`, color: statusColor }}>
-                  <span className='w-1.5 h-1.5 rounded-full' style={{ background: statusColor }}/>
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 4 }}>
+                <div style={{
+                  display: 'flex', alignItems: 'center', gap: 5,
+                  background: `${statusColor}18`, borderRadius: 20,
+                  padding: '2px 8px', fontSize: 11, fontWeight: 500, color: statusColor
+                }}>
+                  <span style={{ width: 6, height: 6, borderRadius: '50%', background: statusColor, display: 'inline-block' }}/>
                   {statusLabel}
-                </div>
-                <div className='flex items-center gap-1 text-[9px] text-green-600 font-medium'>
-                  <svg width='9' height='9' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2.5'>
-                    <rect x='3' y='11' width='18' height='11' rx='2'/>
-                    <path d='M7 11V7a5 5 0 0 1 10 0v4'/>
-                  </svg>
-                  Secure
                 </div>
               </div>
             </div>
 
-            {/* QR Code — clean, scannable */}
-            <div className='flex justify-center px-5 pb-3'>
+            {/* QR Code — solid white, no transparency */}
+            <div style={{ display: 'flex', justifyContent: 'center', padding: '0 20px 12px' }}>
               <div
                 id='qr-svg-wrapper'
-                className='bg-white border border-gray-100 rounded-xl p-3 shadow-sm'
+                style={{
+                  background: '#ffffff',
+                  border: '1px solid #e5e7eb',
+                  borderRadius: 12,
+                  padding: 12,
+                  display: 'inline-block',
+                  lineHeight: 0,         // removes gap below svg
+                }}
               >
                 <QRCodeSVG
                   value={qrData}
@@ -147,7 +195,7 @@ const AppointmentQR = ({ appointment, userData }) => {
             </div>
 
             {/* Info rows */}
-            <div className='px-5 border-t border-gray-100 pt-3 pb-3'>
+            <div style={{ padding: '0 20px 12px', borderTop: '1px solid #f3f4f6', paddingTop: 12 }}>
               {[
                 { label: 'Patient',  value: userData?.name || 'N/A' },
                 { label: 'Doctor',   value: appointment.docData?.name || 'N/A' },
@@ -155,23 +203,28 @@ const AppointmentQR = ({ appointment, userData }) => {
                 { label: 'Time',     value: appointment.slotTime || 'N/A' },
                 { label: 'Payment',  value: paymentStatus, color: appointment.payment ? '#10b981' : '#f59e0b' },
               ].map(({ label, value, color }) => (
-                <div key={label} className='flex justify-between items-center py-1.5 border-b border-gray-50 last:border-0'>
-                  <span className='text-xs text-gray-400'>{label}</span>
-                  <span className='text-xs font-medium text-right max-w-[55%] truncate'
-                    style={{ color: color || '#374151' }}>
+                <div key={label} style={{
+                  display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                  padding: '5px 0', borderBottom: '1px solid #f9fafb'
+                }}>
+                  <span style={{ fontSize: 11, color: '#9ca3af' }}>{label}</span>
+                  <span style={{ fontSize: 11, fontWeight: 500, color: color || '#374151', maxWidth: '55%', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                     {value}
                   </span>
                 </div>
               ))}
             </div>
 
-            {/* Action buttons — INSIDE the card */}
-            <div className='flex gap-2 px-5 pb-4'>
+            {/* Action buttons */}
+            <div style={{ display: 'flex', gap: 8, padding: '0 20px 16px' }}>
               <button
                 onClick={downloadQR}
-                className='flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl
-                  border border-gray-200 bg-gray-50 text-xs font-medium text-gray-600
-                  hover:bg-gray-100 transition-all'
+                style={{
+                  flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  gap: 6, padding: '9px 0', borderRadius: 12,
+                  border: '1px solid #e5e7eb', background: '#f9fafb',
+                  fontSize: 12, fontWeight: 500, color: '#4b5563', cursor: 'pointer'
+                }}
               >
                 <svg width='13' height='13' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2'>
                   <path d='M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4'/>
@@ -183,9 +236,12 @@ const AppointmentQR = ({ appointment, userData }) => {
 
               <button
                 onClick={() => window.open(`https://wa.me/?text=${encodeURIComponent(whatsappMsg)}`, '_blank')}
-                className='flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl
-                  bg-[#25D366] text-white text-xs font-medium
-                  hover:bg-[#20bd5a] transition-all'
+                style={{
+                  flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  gap: 6, padding: '9px 0', borderRadius: 12,
+                  border: 'none', background: '#25D366',
+                  fontSize: 12, fontWeight: 500, color: '#ffffff', cursor: 'pointer'
+                }}
               >
                 <svg width='13' height='13' viewBox='0 0 24 24' fill='currentColor'>
                   <path d='M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z'/>
@@ -195,10 +251,12 @@ const AppointmentQR = ({ appointment, userData }) => {
             </div>
 
             {/* Footer */}
-            <div className='bg-gray-50 px-5 py-2 text-center border-t border-gray-100'>
-              <p className='text-[10px] text-gray-400'>
-                Scan QR or enter ID:{' '}
-                <span className='font-mono font-semibold text-gray-600'>{shortId}</span>
+            <div style={{
+              background: '#f9fafb', borderTop: '1px solid #f3f4f6',
+              padding: '8px 20px', textAlign: 'center'
+            }}>
+              <p style={{ fontSize: 10, color: '#9ca3af', margin: 0 }}>
+                Scan QR or enter ID: <span style={{ fontFamily: 'monospace', fontWeight: 600, color: '#6b7280' }}>{shortId}</span>
               </p>
             </div>
 
@@ -210,4 +268,3 @@ const AppointmentQR = ({ appointment, userData }) => {
 }
 
 export default AppointmentQR
-
