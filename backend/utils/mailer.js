@@ -3,11 +3,14 @@ import nodemailer from 'nodemailer'
 // Reusable transporter — reads from .env
 // Works with Gmail, Outlook, or any SMTP provider
 const transporter = nodemailer.createTransport({
-  service: process.env.EMAIL_SERVICE || 'gmail',
-  port: 587,
+  service: 'gmail',
+  host: 'smtp.gmail.com',      // ← yeh add karo
+  port: 587,                    // ← yeh add karo
+  secure: false,                // ← yeh add karo
+  family: 4,                    // ← sabse zaroori — IPv4 force karo
   auth: {
-    user: process.env.EMAIL_USER,     // your email e.g. appointy.noreply@gmail.com
-    pass: process.env.EMAIL_PASS      // Gmail App Password (not your login password)
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS
   }
 })
 
