@@ -53,7 +53,7 @@ const Navbar = () => {
         {location.pathname === '/' && (
           <button
             onClick={() => window.open("https://appointyhealthcare-admin.vercel.app", '_blank')}
-            className='bg-primary text-white text-xs px-4 py-2 rounded-full hover:bg-gray-700 hidden md:block'
+            className='bg-primary text-white text-xs px-4 py-2 rounded-full hover:bg-gray-700'
           >
             Admin Panel
           </button>
@@ -74,9 +74,9 @@ const Navbar = () => {
         ) : (
           <button
             onClick={() => navigate('/login')}
-            className='bg-primary text-white px-8 py-3 rounded-full font-light hidden md:block'
+            className='bg-primary text-white px-8 py-3 rounded-full font-light'
           >
-            Create Account
+            Login/Sign Up
           </button>
         )}
 
