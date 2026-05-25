@@ -448,6 +448,11 @@ const MyAppointments = () => {
                     className='flex-1 min-w-[120px] py-2 px-3 rounded-xl text-xs font-medium border border-gray-200 text-gray-400 hover:border-red-300 hover:text-red-400 transition-all'>
                     Cancel
                   </button>
+             ) : minutesUntil(item.slotDate, item.slotTime) > 0 ? (
+    <div className='flex-1 min-w-[120px] py-2 px-3 rounded-xl text-xs font-medium border border-gray-100 text-gray-300 text-center'>
+      🔒 Cannot cancel
+    </div>
+  ) : null
                 )}
 
               </div>
