@@ -114,12 +114,12 @@ const Appointment = () => {
         const isBooked     = docInfo.slots_booked?.[slotDate]?.includes(formattedTime) || false
         const isCompleted  = completedSlots.has(key)
         const isCancelled  = cancelledSlots.has(key)
-
+        const isPast = new Date(current) < new Date()
         slots.push({
           datetime:   new Date(current),
           time:       formattedTime,
           slotDate,
-          isBooked,
+         isBooked:   isBooked || isPast,
           isCompleted,
           isCancelled,
         })
