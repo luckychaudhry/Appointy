@@ -31,18 +31,42 @@
 // })
 
 // export default transporter
-import { Resend } from 'resend'
+// import { Resend } from 'resend'
 
-const resend = new Resend(process.env.RESEND_API_KEY)
+// const resend = new Resend(process.env.RESEND_API_KEY)
+
+// const transporter = {
+//   sendMail: async ({ from, to, subject, html }) => {
+//     const { error } = await resend.emails.send({
+//       from: 'Appointy <onboarding@resend.dev>',
+//       to, subject, html
+//     })
+//     if (error) throw error
+//     return { success: true }
+//   }
+// }
+
+// export default transporter
+import fetch from 'node-fetch'
 
 const transporter = {
-  sendMail: async ({ from, to, subject, html }) => {
-    const { error } = await resend.emails.send({
-      from: 'Appointy <onboarding@resend.dev>',
-      to, subject, html
+  sendMail: async ({ to, subject, html }) => {
+    const res = await fetch('https://api.brevo.com/v3/smtp/email', {
+      method: 'POST',
+      headers: {
+        'api-key': process.env.BREVO_API_KEY,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        sender: { name: 'Appointy Healthcare', email: process.env.EMAIL_USER },
+        to: [{ email: to }],
+        subject,
+        htmlContent: html
+      })
     })
-    if (error) throw error
-    return { success: true }
+    const data = await res.json()
+    if (data.messageId) console.log('✅ Email sent')
+    else throw new Error(JSON.stringify(data))
   }
 }
 
